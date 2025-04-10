@@ -1,0 +1,443 @@
+Here is the code for the address directory project
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <conio.h>
+
+struct entry{
+    char name[50], doorno[50], aptmtn[50], strt[50], place[50], city[50], pincode[10], contact[20], email[50];
+    struct entry *lptr, *rptr;
+};
+
+struct entry *start = NULL, *end = NULL;
+
+void addentry();
+void displayall();
+void save();
+void display();
+void disp_file();
+void modify();
+void deletee();
+void deleteall();
+
+void main(){
+    int ch = 0;
+    char a[50];
+    while (ch != 8){
+        system("cls");
+        printf("\t\t\t\t\tPROJECT - ADDRESS BOOK\nMenu:\n\t(1) - Add a newentry\n\t(2) - Display all details\n\t(3) - Display details of a specific person\n\t(4) - Load Entries from the file\n\t(5) - Modify an Entry\n\t(6) - Delete an entry\n\t(7) - Delete all the saved data\n\t(8) - Exit\n\tEnter your choice - ");
+        scanf("%d", &ch);
+        if (ch == 1){
+            addentry();
+            getch();
+        }
+        else if (ch == 2){
+            displayall();
+            getch();
+        }
+        else if (ch == 3){
+            display();
+            getch();
+        }
+        else if (ch == 4){
+            disp_file();
+            getch();
+        }
+        else if (ch == 5){
+            modify();
+            getch();
+        }
+        else if (ch == 6){
+            deletee();
+            getch();
+        }
+        else if (ch == 7){
+            deleteall();
+            getch();
+        }
+        else if (ch == 8)
+            exit(1);
+        else{
+            printf("Enter a valid choice!!!");
+            getchar();
+        }
+    }
+}
+
+void addentry() {
+    struct entry *newe, *tmp; // Declare tmp here
+    int j;
+    char k[5];
+
+    newe = (struct entry *)malloc(sizeof(struct entry));
+    if (!newe) {
+        printf("Memory allocation failed.\n");
+        return;
+    }
+
+    printf("\nEnter the details:\n");
+    fgets(k, sizeof(k), stdin); // To consume newline
+
+    printf("Name: ");
+    fgets(newe->name, sizeof(newe->name), stdin);
+    strtok(newe->name, "\n"); // Remove newline character
+
+    printf("Door no: ");
+    fgets(newe->doorno, sizeof(newe->doorno), stdin);
+    strtok(newe->doorno, "\n");
+
+    printf("Apartment Name: ");
+    fgets(newe->aptmtn, sizeof(newe->aptmtn), stdin);
+    strtok(newe->aptmtn, "\n");
+
+    printf("Street: ");
+    fgets(newe->strt, sizeof(newe->strt), stdin);
+    strtok(newe->strt, "\n");
+
+    printf("Place: ");
+    fgets(newe->place, sizeof(newe->place), stdin);
+    strtok(newe->place, "\n");
+
+    printf("City: ");
+    fgets(newe->city, sizeof(newe->city), stdin);
+    strtok(newe->city, "\n");
+
+    printf("Pin-code: ");
+    fgets(newe->pincode, sizeof(newe->pincode), stdin);
+    strtok(newe->pincode, "\n");
+
+    printf("Contact: ");
+    fgets(newe->contact, sizeof(newe->contact), stdin);
+    strtok(newe->contact, "\n");
+
+    printf("Email: ");
+    fgets(newe->email, sizeof(newe->email), stdin);
+    strtok(newe->email, "\n");
+
+    newe->lptr = NULL;
+    newe->rptr = NULL;
+
+    if (start == NULL) {
+        start = newe;
+        end = newe;
+    } else {
+        tmp = start; // tmp was declared earlier, now it is assigned
+        while (tmp->rptr != NULL && strcasecmp(tmp->name, newe->name) < 0) {
+            tmp = tmp->rptr;
+        }
+
+        if (strcasecmp(tmp->name, newe->name) > 0) {
+            newe->rptr = tmp;
+            newe->lptr = tmp->lptr;
+            if (tmp->lptr) tmp->lptr->rptr = newe;
+            tmp->lptr = newe;
+            if (tmp == start) start = newe;
+        } else {
+            newe->lptr = tmp;
+            newe->rptr = tmp->rptr;
+            if (tmp->rptr) tmp->rptr->lptr = newe;
+            tmp->rptr = newe;
+            if (tmp == end) end = newe;
+        }
+    }
+
+    save();
+    printf("Entry is added\n");
+}
+
+void displayall()
+{
+    struct entry *tmp; // Declare tmp at the start of the function
+
+    if (start == NULL)
+        printf("No entries present\n");
+    else
+    {
+        system("cls");
+        tmp = start; // No need to allocate memory, just assign start
+        int i = 0;
+        while (tmp != NULL)
+        {
+            printf("\nEntry %d:\nName: %s\nAddress: %s, %s,\n%s,\n%s,\n%s.\nPin-code: %s\nMobile: %s\nEmail-id: %s\n",
+                   ++i, tmp->name, tmp->doorno, tmp->aptmtn, tmp->strt, tmp->place, tmp->city, tmp->pincode, tmp->contact, tmp->email);
+            tmp = tmp->rptr;
+        }
+    }
+}
+
+void save()
+{
+    FILE *f;
+    struct entry *tmp; // Declare tmp inside the function
+
+    f = fopen("Address Book.c", "w");
+    if (f == NULL) 
+    {
+        printf("Error opening file!\n");
+        return;
+    }
+
+    tmp = start; // No need to allocate memory, just assign start
+
+    while (tmp != NULL)
+    {
+        fprintf(f, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", 
+                tmp->name, tmp->doorno, tmp->aptmtn, tmp->strt, 
+                tmp->place, tmp->city, tmp->pincode, tmp->contact, tmp->email);
+        tmp = tmp->rptr;
+    }
+
+    fclose(f);
+}
+
+void display()
+{
+    char name[50], a[50];
+    int f = 0;
+    struct entry *tmp;  // Declare tmp inside the function
+
+    if (start == NULL)
+        printf("No entries present");
+    else
+    {
+        system("cls");
+        tmp = start;  // No need to allocate memory, just point to start
+
+        printf("Enter the name of the person: ");
+        gets(a);
+        gets(name);
+
+        while (tmp != NULL)
+        {
+            if (strcmpi(tmp->name, name) == 0)
+            {
+                printf("\nName: %s\nAddress: %s, %s,\n%s,\n%s,\n%s.\n"
+                       "Pin-code: %s\nMobile: %s\nEmail-id: %s\n",
+                       tmp->name, tmp->doorno, tmp->aptmtn, tmp->strt, 
+                       tmp->place, tmp->city, tmp->pincode, tmp->contact, tmp->email);
+                f = 1;
+            }
+            else if (strcmpi(tmp->name, name) > 0 && f == 0)
+            {
+                printf("Name not found!!!");
+                break;
+            }
+            else if (strcmpi(tmp->name, name) > 0)
+                break;
+            
+            tmp = tmp->rptr;
+        }
+    }
+}
+
+void disp_file()
+{
+    int i = 0;
+    char a[50];
+    struct entry tmp; // Using struct instead of dynamically allocating
+    FILE *f;
+
+    f = fopen("Address Book.c", "r");
+
+    if (f == NULL)
+    {
+        printf("No entries present\n");
+        return;
+    }
+
+    system("cls");
+
+    while (fgets(tmp.name, sizeof(tmp.name), f) != NULL)
+    {
+        tmp.name[strcspn(tmp.name, "\n")] = 0; // Remove newline character
+
+        fgets(tmp.doorno, sizeof(tmp.doorno), f);
+        tmp.doorno[strcspn(tmp.doorno, "\n")] = 0;
+
+        fgets(tmp.aptmtn, sizeof(tmp.aptmtn), f);
+        tmp.aptmtn[strcspn(tmp.aptmtn, "\n")] = 0;
+
+        fgets(tmp.strt, sizeof(tmp.strt), f);
+        tmp.strt[strcspn(tmp.strt, "\n")] = 0;
+
+        fgets(tmp.place, sizeof(tmp.place), f);
+        tmp.place[strcspn(tmp.place, "\n")] = 0;
+
+        fgets(tmp.city, sizeof(tmp.city), f);
+        tmp.city[strcspn(tmp.city, "\n")] = 0;
+
+        fgets(tmp.pincode, sizeof(tmp.pincode), f);
+        tmp.pincode[strcspn(tmp.pincode, "\n")] = 0;
+
+        fgets(tmp.contact, sizeof(tmp.contact), f);
+        tmp.contact[strcspn(tmp.contact, "\n")] = 0;
+
+        fgets(tmp.email, sizeof(tmp.email), f);
+        tmp.email[strcspn(tmp.email, "\n")] = 0;
+
+        printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n", tmp.name, tmp.doorno, tmp.aptmtn, tmp.strt, tmp.place, tmp.city, tmp.pincode, tmp.contact, tmp.email);
+    }
+
+    fclose(f); // Close the file
+}
+
+
+void modify()
+{
+    char name[50], b[50];
+    int f = 0, i, x;
+    
+    if (start == NULL)
+    {
+        printf("No entries present");
+        return;
+    }
+
+    struct entry *tmp = start;  // Declare and initialize tmp
+
+    printf("Whose details do you want to change?\n");
+    fflush(stdin);  // Clear input buffer
+    fgets(name, sizeof(name), stdin);
+    name[strcspn(name, "\n")] = 0; // Remove trailing newline
+
+    while (tmp != NULL)
+    {
+        if (strcmpi(tmp->name, name) == 0)
+        {
+            do
+            {
+                system("cls");
+                printf("\nWhich one do you want to modify?\n");
+                printf("\t(1) - Name\n\t(2) - Door Number\n\t(3) - Apartment Name\n");
+                printf("\t(4) - Street\n\t(5) - Place\n\t(6) - City\n");
+                printf("\t(7) - Pin-Code\n\t(8) - Contact\n\t(9) - Email\n");
+                printf("Enter your choice: ");
+                scanf("%d", &i);
+                getchar(); // Consume newline character left by scanf
+
+                if (i >= 1 && i <= 9)
+                {
+                    printf("Enter new value: ");
+                    fgets(b, sizeof(b), stdin);
+                    b[strcspn(b, "\n")] = 0; // Remove trailing newline
+
+                    switch (i)
+                    {
+                        case 1: strcpy(tmp->name, b); break;
+                        case 2: strcpy(tmp->doorno, b); break;
+                        case 3: strcpy(tmp->aptmtn, b); break;
+                        case 4: strcpy(tmp->strt, b); break;
+                        case 5: strcpy(tmp->place, b); break;
+                        case 6: strcpy(tmp->city, b); break;
+                        case 7: strcpy(tmp->pincode, b); break;
+                        case 8: strcpy(tmp->contact, b); break;
+                        case 9: strcpy(tmp->email, b); break;
+                    }
+                }
+                else
+                {
+                    printf("Enter a valid choice!\n");
+                }
+
+                printf("\nDo you want to modify anything else in this entry? (1 for Yes / 0 for No): ");
+                scanf("%d", &x);
+                getchar(); // Consume newline character
+
+            } while (x == 1);
+
+            system("cls");
+            printf("Entry after changes:\n");
+            printf("\nName: %s\nAddress: %s, %s,\n%s,\n%s,\n%s.\nPin-code: %s\nMobile: %s\nEmail-id: %s\n",
+                   tmp->name, tmp->doorno, tmp->aptmtn, tmp->strt, tmp->place, tmp->city, tmp->pincode, tmp->contact, tmp->email);
+            printf("\nEntry saved!!!\n");
+
+            f = 1;
+            break;  // Stop modifying after finding and editing the entry
+        }
+        tmp = tmp->rptr;
+    }
+
+    if (f == 0)
+    {
+        printf("Name not found!!!\n");
+    }
+
+    save();  // Save changes
+}
+
+void deletee()
+{
+    char name[50];
+
+    if (start == NULL)
+    {
+        printf("No entries present\n");
+        return;
+    }
+
+    system("cls");
+
+    struct entry *tmp = start;  // Declare and initialize tmp
+
+    printf("Enter the name of the person to delete: ");
+    fflush(stdin);  // Clear input buffer
+    fgets(name, sizeof(name), stdin);
+    name[strcspn(name, "\n")] = 0; // Remove trailing newline
+
+    while (tmp != NULL)
+    {
+        if (strcmpi(tmp->name, name) == 0)
+        {
+            printf("\nDeleted the entry:\n");
+            printf("\nName: %s\nAddress: %s, %s,\n%s,\n%s,\n%s.\nPin-code: %s\nMobile: %s\n",
+                   tmp->name, tmp->doorno, tmp->aptmtn, tmp->strt, tmp->place, tmp->city, tmp->pincode, tmp->contact, tmp->email);
+
+            // Case 1: Only one node in the list
+            if (tmp->lptr == NULL && tmp->rptr == NULL)
+            {
+                start = NULL;
+                end = NULL;
+            }
+            // Case 2: Deleting the first node
+            else if (tmp->lptr == NULL)
+            {
+                start = tmp->rptr;
+                start->lptr = NULL;
+            }
+            // Case 3: Deleting the last node
+            else if (tmp->rptr == NULL)
+            {
+                end = tmp->lptr;
+                end->rptr = NULL;
+            }
+            // Case 4: Deleting a node in the middle
+            else
+            {
+                tmp->lptr->rptr = tmp->rptr;
+                tmp->rptr->lptr = tmp->lptr;
+            }
+
+            free(tmp);  // Free memory
+            save();     // Save changes
+            return;
+        }
+        else if (strcmpi(tmp->name, name) > 0)
+        {
+            printf("Name not found!!!\n");
+            return;
+        }
+
+        tmp = tmp->rptr;
+    }
+
+    printf("Name not found!!!\n");
+}
+
+void deleteall()
+{
+    start = NULL;
+    end = NULL;
+    save();
+    printf("\nDeleted all the files!!!");
+}
